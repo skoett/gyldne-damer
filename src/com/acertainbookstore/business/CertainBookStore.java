@@ -321,6 +321,58 @@ public class CertainBookStore implements BookStore, StockManager {
 		if (numBooks < 0) {
 			throw new BookStoreException("numBooks = " + numBooks + ", but it must be positive");
 		}
+		// Get all books that have a rating
+		List<BookStoreBook> listAllBooks = bookMap.entrySet().stream().map(book -> book.getValue()).collect(Collectors.toList());
+
+		// We want to make an empty list of books to be returned
+		Set<Integer> topRatedBooksIndex = new HashSet<>();
+
+		// If we have less books in the store than numBook, we add all to indexes
+		if (listAllBooks.size() <= numBooks) {
+			for (int i = 0; i<listAllBooks.size(); i++) {
+				topRatedBooksIndex.add(i);
+			}
+		} else {
+			// Initialize new BookStoreBook hash set
+			Set<BookStoreBook> topRatedBooks = new HashSet<>();
+			BookStoreBook instance;
+
+			for (int i = 0; i<listAllBooks.size(); i++) {
+				// If length of books are smaller than numBooks we add the book
+				if (topRatedBooks.size() < numBooks) {
+					topRatedBooks.add(listAllBooks.get(i));
+					// If not, we must iterate through all books in topRatedBooks to find lowest rated book
+				} else {
+					int index = -1;
+					long lowestRating = 5;
+					// Now we iterate through the for loop to find the lowest rated book
+					for (int j = 0; j<topRatedBooks.size(); j++) {
+						instance = listAllBooks.get(j);
+						if (instance.getTotalRating() < lowestRating) {
+							lowestRating = instance.getTotalRating();
+							index = j;
+						}
+					}
+					// As we have found the lowest rated book, we can check if the current book from all books
+					// are rated higher than the lowest rated book from current top rated books.
+					// If yes, we remove the lowest rated book and replace it with the new book
+					if (listAllBooks.get(i).getTotalRating() > lowestRating && index != -1) {
+						topRatedBooks.remove(listAllBooks.get(index));
+						topRatedBooks.add(listAllBooks.get(i));
+					}
+				}
+			}
+			// We now get the indexes of the top rated books from all books
+			for (int i = 0; i<listAllBooks.size();i++) {
+				if (topRatedBooks.contains(listAllBooks.get(i))) {
+					topRatedBooksIndex.add(i);
+				}
+			}
+		}
+
+		// Return books which have the top ratings.
+		return topRatedBooksIndex.stream().map(index -> listAllBooks.get(index).immutableBook())
+				.collect(Collectors.toList());
 
 	}
 
