@@ -389,10 +389,9 @@ public class BookStoreTest {
 
 		// Assert that our three top rated books matches the above books
 		List<Book> topRatedBooks = client.getTopRatedBooks(3);
-		assertEquals(topRatedBooks.get(0).getISBN(), TEST_ISBN+2);
-		assertEquals(topRatedBooks.get(1).getISBN(), TEST_ISBN+3);
-		assertEquals(topRatedBooks.get(2).getISBN(), TEST_ISBN+1);
-
+		assertTrue(topRatedBooks.contains(book1));
+		assertTrue(topRatedBooks.contains(book2));
+		assertTrue(topRatedBooks.contains(book3));
 	}
 
 	/**
