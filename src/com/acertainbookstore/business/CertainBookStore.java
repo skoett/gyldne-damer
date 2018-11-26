@@ -383,7 +383,16 @@ public class CertainBookStore implements BookStore, StockManager {
 	 */
 	@Override
 	public synchronized List<StockBook> getBooksInDemand() throws BookStoreException {
-		throw new BookStoreException();
+		// here we filter for all books with more missedSales count larger than zero
+		List<BookStoreBook> listMissedSalesBooks = bookMap.entrySet().stream().map(pair -> pair.getValue())
+				.filter(book -> book.getNumSaleMisses() > 0).collect(Collectors.toList());
+
+		// A new list with the proper type (StockBook) is created
+		List<StockBook> inDemandBooks = new ArrayList<>();
+		for (BookStoreBook b : listMissedSalesBooks) {
+			inDemandBooks.add(b.immutableStockBook());
+		}
+		return inDemandBooks;
 	}
 
 	/*

@@ -135,6 +135,10 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 				getTopRatedBooks(request, response);
 				break;
 
+			case GETBOOKSINDEMAND:
+				getBooksInDemand(request, response);
+				break;
+
 			default:
 				System.err.println("Unsupported message tag.");
 				break;
@@ -463,5 +467,27 @@ public class BookStoreHTTPMessageHandler extends AbstractHandler {
 		response.getOutputStream().write(serializedResponseContent);
 	}
 
+	/**
+	 * Gets the books with 0 < number of missed sales.
+	 *
+	 * @param request
+	 *            the request
+	 * @param response
+	 *            the response
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	private void getBooksInDemand(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		BookStoreResponse bookStoreResponse = new BookStoreResponse();
+
+		try {
+			myBookStore.getBooksInDemand();
+		} catch (BookStoreException ex) {
+			bookStoreResponse.setException(ex);
+		}
+
+		byte[] serializedResponseContent = serializer.get().serialize(bookStoreResponse);
+		response.getOutputStream().write(serializedResponseContent);
+	}
 
 }

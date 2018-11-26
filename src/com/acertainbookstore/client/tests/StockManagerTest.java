@@ -476,6 +476,56 @@ public class StockManagerTest {
 	}
 
 	/**
+	 * Tests basic getBooksInDemand functionality.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testgetBooksInDemand() throws BookStoreException {
+		// As with the other tests in BookStoreTest, we have oure trusty testing trilogy
+		// note that book num 2 is not in demand
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		StockBook book1 = new ImmutableStockBook(TEST_ISBN+1, "Test of Thrones 1",
+				"George RR Testin'", (float) 10, 5, 5, 0,
+				3, false);
+		StockBook book2 = new ImmutableStockBook(TEST_ISBN+2, "Test of Thrones 2",
+				"George RR Testin'", (float) 10, 5, 0, 0,
+				4, false);
+		StockBook book3 = new ImmutableStockBook(TEST_ISBN+3, "Test of Thrones 3",
+				"George RR Testin'", (float) 10, 5, 1, 0,
+				5, false);
+		booksToAdd.add(book1);
+		booksToAdd.add(book2);
+		booksToAdd.add(book3);
+		storeManager.addBooks(booksToAdd);
+
+
+		List<StockBook> booksInStoreList = storeManager.getBooksInDemand();
+
+		// obs! the default test book is not in demand, and is therefore not expected to show up along with book 2
+		assertEquals(booksInStoreList.size(), 2);
+		assertTrue(booksInStoreList.contains(book1));
+		assertFalse(booksInStoreList.contains(book2));
+		assertTrue(booksInStoreList.contains(book3));
+	}
+
+	/**
+	 * Tests getBooksInDemand for empty query.
+	 *
+	 * @throws BookStoreException
+	 *             the book store exception
+	 */
+	@Test
+	public void testEmptyGetBooksInDemand() throws BookStoreException {
+
+		List<StockBook> booksInStoreList = storeManager.getBooksInDemand();
+
+		// obs! the default test book is not in demand
+		assertEquals(booksInStoreList.size(), 0);
+	}
+
+	/**
 	 * Tear down after class.
 	 *
 	 * @throws BookStoreException
