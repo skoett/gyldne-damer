@@ -363,6 +363,53 @@ public class BookStoreTest {
 		StockBook bookInList = listBooks.get(0);
 
 		// Test whether the rating is set. I.e. rating == 4
+		assertEquals(bookInList.getTotalRating(), 4);
+	}
+
+
+	/**
+	 *  Test that a book with a valid ISBN and invalid rating.
+	 *	We expect a bookstore exception
+	 *
+	 */
+	@Test(expected = BookStoreException.class)
+	public void testRateBookValidISBNInvalidRating() throws BookStoreException {
+		// Create a rating for a given book
+		Set<BookRating> booksToRate = new HashSet<>();
+		booksToRate.add(new BookRating(TEST_ISBN, -1));
+
+		//Lets try to add the rating to the store
+		client.rateBooks(booksToRate);
+	}
+
+	/**
+	 *  Test that a book with an invalid ISBN and invalid rating.
+	 *	We expect a bookstore exception
+	 *
+	 */
+	@Test(expected = BookStoreException.class)
+	public void testRateBookInvalidISBNInvalidRating() throws BookStoreException {
+		// Create a rating for a given book
+		Set<BookRating> booksToRate = new HashSet<>();
+		booksToRate.add(new BookRating(-1, -1));
+
+		//Lets try to add the rating to the store
+		client.rateBooks(booksToRate);
+	}
+
+	/**
+	 *  Test that a book with an invalid ISBN and valid rating.
+	 *	We expect a bookstore exception
+	 *
+	 */
+	@Test(expected = BookStoreException.class)
+	public void testRateBookInvalidISBNValidRating() throws BookStoreException {
+		// Create a rating for a given book
+		Set<BookRating> booksToRate = new HashSet<>();
+		booksToRate.add(new BookRating(-1, 2));
+
+		//Lets try to add the rating to the store
+		client.rateBooks(booksToRate);
 	}
 
 	/**
@@ -395,14 +442,106 @@ public class BookStoreTest {
 	}
 
 	/**
-	 * Test whether we can get a single book in demand
+	 * Test that we can get 1 top rated books from store with more than 1 book in store
 	 *
 	 */
 	@Test
-	public void testGetSingleBookInDemand() throws BookStoreException {
-		// undefined yet =)
-		assertEquals(3,3);
+	public void testGet1TopRatedBooks() throws BookStoreException {
+		// Create and add books with ratings to store
+		// Apparently we have a trilogy which gets better by each book
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		StockBook book1 = new ImmutableStockBook(TEST_ISBN+1, "Test of Thrones 1", "George RR Testin'", (float) 10, 5, 0, 1,
+				3, false);
+		StockBook book2 = new ImmutableStockBook(TEST_ISBN+2, "Test of Thrones 2", "George RR Testin'", (float) 10, 5, 0, 1,
+				4, false);
+		StockBook book3 = new ImmutableStockBook(TEST_ISBN+3, "Test of Thrones 3", "George RR Testin'", (float) 10, 5, 0, 1,
+				5, false);
+		booksToAdd.add(book1);
+		booksToAdd.add(book2);
+		booksToAdd.add(book3);
+
+		// Add the books to the store through the store manager
+		storeManager.addBooks(booksToAdd);
+
+		// Assert that our three top rated books matches the above books
+		List<Book> topRatedBooks = client.getTopRatedBooks(1);
+		assertTrue(topRatedBooks.contains(book3));
 	}
+
+	/**
+	 * Test that we can get illformed k in top rated books from store with more than 1 book in store
+	 *
+	 */
+	@Test(expected = BookStoreException.class)
+	public void testGetIllformedTopRatedBooks() throws BookStoreException {
+		// Create and add books with ratings to store
+		// Apparently we have a trilogy which gets better by each book
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		StockBook book1 = new ImmutableStockBook(TEST_ISBN+1, "Test of Thrones 1", "George RR Testin'", (float) 10, 5, 0, 1,
+				3, false);
+		StockBook book2 = new ImmutableStockBook(TEST_ISBN+2, "Test of Thrones 2", "George RR Testin'", (float) 10, 5, 0, 1,
+				4, false);
+		StockBook book3 = new ImmutableStockBook(TEST_ISBN+3, "Test of Thrones 3", "George RR Testin'", (float) 10, 5, 0, 1,
+				5, false);
+		booksToAdd.add(book1);
+		booksToAdd.add(book2);
+		booksToAdd.add(book3);
+
+		// Add the books to the store through the store manager
+		storeManager.addBooks(booksToAdd);
+
+		// Assert that our three top rated books matches the above books
+		List<Book> something = client.getTopRatedBooks(-1);
+	}
+
+	/**
+	 * Test that we can get illformed k in top rated books from store with zero books in store
+	 *
+	 */
+	@Test(expected = BookStoreException.class)
+	public void testGetIllformedZeroBooksInTopRatedBooks() throws BookStoreException {
+		List<Book> something = client.getTopRatedBooks(-1);
+	}
+
+
+	/**
+	 * Test that we can get all books from store when k is higher than
+	 * number of books in store
+	 *
+	 */
+	@Test
+	public void testGetAllTopRatedBooks() throws BookStoreException {
+		// Create and add books with ratings to store
+		// Apparently we have a trilogy which gets better by each book
+
+		Set<StockBook> booksToAdd = new HashSet<StockBook>();
+		StockBook book1 = new ImmutableStockBook(TEST_ISBN+1, "Test of Thrones 1", "George RR Testin'", (float) 10, 5, 0, 1,
+				3, false);
+		StockBook book2 = new ImmutableStockBook(TEST_ISBN+2, "Test of Thrones 2", "George RR Testin'", (float) 10, 5, 0, 1,
+				4, false);
+		StockBook book3 = new ImmutableStockBook(TEST_ISBN+3, "Test of Thrones 3", "George RR Testin'", (float) 10, 5, 0, 1,
+				5, false);
+		booksToAdd.add(book1);
+		booksToAdd.add(book2);
+		booksToAdd.add(book3);
+
+		// Ensure the bookstore is empty
+		storeManager.removeAllBooks();
+
+		// Add the books to the store through the store manager
+		storeManager.addBooks(booksToAdd);
+
+		// Assert that our three top rated books matches the above books
+		List<Book> topRatedBooks = client.getTopRatedBooks(30);
+		assertTrue(topRatedBooks.contains(book1));
+		assertTrue(topRatedBooks.contains(book2));
+		assertTrue(topRatedBooks.contains(book3));
+		assertTrue(topRatedBooks.size() == 3);
+	}
+
+
 
 	/**
 	 * Tear down after class.

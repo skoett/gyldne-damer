@@ -417,10 +417,12 @@ public class CertainBookStore implements BookStore, StockManager {
 			}
 
 			isbn = bookCopyToRate.getISBN();
-			book = bookMap.get(isbn);
 			// Validate whether ISBN is in stock
 			validateISBNInStock(isbn);
-
+		}
+		for (BookRating bookCopyToRate : bookRating) {
+			isbn = bookCopyToRate.getISBN();
+			book = bookMap.get(isbn);
 			// We can now set the rating of the book
 			book.addRating(bookCopyToRate.getRating());
 		}
